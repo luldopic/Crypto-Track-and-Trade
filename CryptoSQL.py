@@ -1,32 +1,35 @@
 import mysql.connector
+import json
 
 
-class DB:
+class CryptoDB:
     def __init__(self):
-        self.connectToDB
+        self.connectToDB()
 
     def addCoin(self, coin_name):
         if not self.coinTableExists(coin_name):
             SQL = "CREATE TABLE {coin_name} " \
-                  "(date DATETIME NOT NULL, " \
+                  "(unixdate BIGINT  NOT NULL, " \
                   "rate BIGINT NOT NULL, " \
-                  "volume DOUBLE(13), " \
-                  "cap DOUBLE (13), " \
-                  "liquidity DOUBLE(13)," \
-                  "PRIMARY KEY (date)".format(coin_name=coin_name)
+                  "volume DOUBLE(26,13), " \
+                  "cap DOUBLE (26,13), " \
+                  "liquidity DOUBLE(26,13)," \
+                  "PRIMARY KEY (unixdate))".format(coin_name=coin_name)
+            self.executeSQLCursor(SQL)
+            SQL = "INSERT INTO coin_list (coin_name) VALUES ('{coin_name}')".format(coin_name=coin_name)
             self.executeSQLCursor(SQL)
         else:
             print("Coin already added")
 
-    def addRecord(self, record):
+    def addRecord(self, coin_name, record):
         columns = str(tuple(record.keys())).replace("'", "")
         values = str(tuple(record.values())).replace("\"", "'")
-        SQL = "INSERT INTO {table} {columns} VALUES {values}".format(table=table_name, columns=columns, values=values)
+        SQL = "INSERT INTO {table} {columns} VALUES {values}".format(table=coin_name, columns=columns, values=values)
         self.executeSQLCursor(SQL)
         self.db.commit()
 
-    def coinTableExists(self,coin_name):
-        SQL = "SHOW TABLES LIKE '{name}'".format(name=table_name)
+    def coinTableExists(self, coin_name):
+        SQL = "SHOW TABLES LIKE '{name}'".format(name=coin_name)
         res = self.executeSQLCursor(SQL)
         if len(res) == 0:
             return False
@@ -48,7 +51,11 @@ class DB:
                 self.db = mysql.connector.connect(host=credentials["host"], user=credentials["user"],
                                                   password=credentials["password"], database="cryptotrack")
                 print("Successful Connection")
+
             except Exception as e:
                 print(e)
             finally:
-                del credentials
+                if 'credentials' in locals():
+                    del credentials
+                else:
+                    pass
