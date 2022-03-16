@@ -29,6 +29,7 @@ class CryptoDB:
         SQL = "UPDATE coin_list SET EntryCount={count} WHERE coin_name = '{coin_name}'".format\
             (count=count,coin_name=coin_name.lower())
         self.executeSQLCursor(SQL)
+        self.db.commit()
 
 
     def addRecord(self, coin_name, record):
