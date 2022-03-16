@@ -1,1 +1,2 @@
 import CryptoSQL
+import mysql.connector
