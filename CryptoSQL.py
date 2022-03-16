@@ -6,23 +6,33 @@ class CryptoDB:
     def __init__(self):
         self.connectToDB()
 
-    def addCoin(self, coin_name):
+    def addCoin(self, coin_name, rank):
         if not self.coinTableExists(coin_name):
             SQL = "CREATE TABLE {coin_name} " \
                   "(unixdate BIGINT  NOT NULL, " \
-                  "rate BIGINT NOT NULL, " \
-                  "volume DOUBLE(26,13), " \
-                  "cap DOUBLE (26,13), " \
-                  "liquidity DOUBLE(26,13)," \
+                  "rate DOUBLE(30,15) NOT NULL, " \
+                  "volume BIGINT, " \
+                  "cap BIGINT, " \
+                  "liquidity BIGINT," \
                   "PRIMARY KEY (unixdate))".format(coin_name=coin_name)
             self.executeSQLCursor(SQL)
-            SQL = "INSERT INTO coin_list (coin_name) VALUES ('{coin_name}')".format(coin_name=coin_name)
+            SQL = "INSERT INTO coin_list (coin_name, coin_rank) VALUES ('{coin_name}',{coin_rank})".format(
+                coin_name=coin_name, coin_rank=rank)
             self.executeSQLCursor(SQL)
         else:
             print("Coin already added")
 
+    def UpdateEntryCount(self,coin_name):
+        SQL = "SELECT COUNT(*) FROM {coin_name}".format(coin_name=coin_name)
+        res = self.executeSQLCursor(SQL)
+        count = res[0][0]
+        SQL = "UPDATE coin_list SET EntryCount={count} WHERE coin_name = '{coin_name}'".format\
+            (count=count,coin_name=coin_name.lower())
+        self.executeSQLCursor(SQL)
+
+
     def addRecord(self, coin_name, record):
-        columns = str(tuple(record.keys())).replace("'", "")
+        columns = str(tuple(record.keys())).replace("'", "").replace("date","unixdate")
         values = str(tuple(record.values())).replace("\"", "'")
         SQL = "INSERT INTO {table} {columns} VALUES {values}".format(table=coin_name, columns=columns, values=values)
         self.executeSQLCursor(SQL)
