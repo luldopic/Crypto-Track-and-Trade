@@ -1,2 +1,3 @@
 import CryptoSQL
-import mysql.connector
+
+DB = CryptoSQL.CryptoDB()
