@@ -16,6 +16,16 @@ class coin_data:
             'x-api-key': 'e5d88ba2-cbea-43e5-8dd8-9b9e7d0bdc05'
         }
 
+    def get_month_historical(self,coin, year, month):
+        date = datetime(year, month, 1)
+        month_length = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        delta = month_length[month-1]
+        return self.get_historical_single(coin, date, delta)
+
+    def get_year_historical(self, coin, year):
+        date = datetime(year, 1, 1)
+        return self.get_historical_single(coin, date, 365)
+
     def get_historical_single(self, coin, date, delta=1, currency="USD"):
         url = "https://api.livecoinwatch.com/coins/single/history"
         payload = json.dumps(
