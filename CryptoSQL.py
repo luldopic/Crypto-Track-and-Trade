@@ -53,6 +53,7 @@ class CryptoDB:
         cursor.execute(command)
         res = cursor.fetchall()
         cursor.close()
+        self.db.commit()
         return res
 
     def connectToDB(self):
