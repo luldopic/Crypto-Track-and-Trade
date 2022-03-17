@@ -7,6 +7,7 @@ import requests
 import json
 from datetime import datetime, timedelta
 import time
+import CryptoSQL
 
 
 class coin_data:
@@ -16,11 +17,25 @@ class coin_data:
             'x-api-key': 'e5d88ba2-cbea-43e5-8dd8-9b9e7d0bdc05'
         }
 
-    def get_month_historical(self,coin, year, month):
+    def get_month_historical(self, coin, year, month):
         date = datetime(year, month, 1)
         month_length = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
         delta = month_length[month-1]
         return self.get_historical_single(coin, date, delta)
+
+    def get_day_historical(self,coin, year, day):
+        date = datetime(year-1, 12, 31) + timedelta(days=day)
+        DB = CryptoSQL.CryptoDB()
+        SQL = "SELECT age FROM coin_list WHERE coin_name='{coin}'".format(coin=coin)
+        res = DB.executeSQLCursor(SQL)
+        age = res[0][0]
+        diff = datetime.now()-date
+        diff = diff.days
+        if diff<age:
+            return self.get_historical_single(coin, date, 1)
+        else:
+            print("Coin is too young")
+            raise CoinTooYoung
 
     def get_year_historical(self, coin, year):
         date = datetime(year, 1, 1)
@@ -62,8 +77,8 @@ class coin_data:
             "sort": "rank",
             "order": "ascending",
             "offset": 0,
-            "limit": 100,
-            "meta": False
+            "limit": 200,
+            "meta": True
         })
         response = requests.request("POST", url, headers=self.headers, data=payload)
         return json.loads(response.text)
@@ -71,3 +86,8 @@ class coin_data:
     def convertUNIX(self, date):
         date = int(time.mktime(date.timetuple())) * 1000
         return date
+
+
+class CoinTooYoung(Exception):
+    pass
+
