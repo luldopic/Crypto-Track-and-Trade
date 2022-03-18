@@ -13,6 +13,7 @@ class updateDatabase:
         self.DB = CryptoSQL.CryptoDB()
         self.update_coin_list_from_LiveCoin()
         self.coin_list = self.get_coin_list_from_SQLServer()
+        self.updateEntryCount()
 
     def convertUNIXToDateTime(self, unix):
         converted = datetime.fromtimestamp(int(unix)).strftime('%Y-%m-%d %H:%M:%S')
@@ -82,6 +83,3 @@ class updateDatabase:
                     except mysql.connector.errors.ProgrammingError as e:
                         print("coin ", coin, "caused error", e)
 
-
-update = updateDatabase()
-update.updateEntryCount()
